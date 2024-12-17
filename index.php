@@ -13,7 +13,8 @@ include "config.php";
 
     <!-- boostrap css -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="assets/css/datatables.min.css">
+    <link rel="stylesheet" href="assets/css/all.css">
 </head>
 <body>
 
@@ -24,7 +25,7 @@ include "config.php";
       <a class="nav-link" href="index.php">Home</a>
     </li>
     <li class="nav-item active">
-      <a class="nav-link" href="#">Gejala</a>
+      <a class="nav-link" href="?page=gejala">Gejala</a>
     </li>
     <li class="nav-item active">
       <a class="nav-link" href="#">Penyakit</a>
@@ -49,15 +50,15 @@ include "config.php";
 
     if ($page==""){
         include "welcome.php";
-            }elseif ($page=="NAMA_PAGE"){
+            }elseif ($page=="gejala"){
         if ($action==""){
-          include "NAMA_HALAMAN";
-        }elseif ($action=="NAMA_ACTION"){
-            include "NAMA_HALAMAN";
-        }elseif ($action=="NAMA_ACTION"){
-            include "NAMA_HALAMAN";
+          include "tampil_gejala.php";
+        }elseif ($action=="tambah"){
+            include "tambah_gejala.php";
+        }elseif ($action=="update"){
+            include "update_gejala.php";
         }else{
-            include "NAMA_HALAMAN";
+            include "hapus_gejala.php";
         }
     }else{
         include "NAMA_HALAMAN";
@@ -72,6 +73,17 @@ include "config.php";
 
 
 <!-- bosstrap js-->
-<link rel="stylesheet" href="assets\js\bootstrap.min.js">
+<script src="assets/js/bootstrap.min.js"></script>
+
+<!-- database js-->
+<script src="assets/js/datatables.min.js"> </script>
+
+ <script>
+      $(document).ready(function() {
+            $('#myTable').DataTable();
+      } );
+  </script>
+
+<script src="assets/js/all.js"> </script>
 </body>
 </html>
