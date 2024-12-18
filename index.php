@@ -14,6 +14,7 @@ include "config.php";
     <link rel="stylesheet" href="assets/css/datatables.min.css">
     <link rel="stylesheet" href="assets/css/all.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap-chosen.css">
     
     <style>
         body {
@@ -151,13 +152,18 @@ include "config.php";
         } else {
             include "hapus_penyakit.php";
         }
-    } elseif ($page == "aturan") {
-        include "aturan.php";
-    } elseif ($page == "konsultasi") {
-        include "konsultasi.php";
-    } else {
-        include "404.php";
+    }elseif ($page == "aturan") {
+        if ($action == "") {
+            include "tampil_aturan.php";
+        } elseif ($action == "tambah") {
+            include "tambah_aturan.php";
+        } elseif ($action == "update") {
+            include "update_penyakit.php";
+        } else {
+            include "hapus_penyakit.php";
+        }
     }
+
     ?>
 
 </div>
@@ -183,5 +189,12 @@ include "config.php";
 </script>
 
 <script src="assets/js/all.js"></script>
+<script src="assets/js/chosen.jquery.min.js"></script>
+<script>
+      $(function() {
+        $('.chosen').chosen();
+      });
+</script>
+
 </body>
 </html>
