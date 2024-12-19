@@ -1,115 +1,119 @@
 <?php
+if (isset($_POST['simpan'])) {
+    $nmpenyakit = trim($_POST['nmpenyakit']);
 
-    if(isset($_POST['simpan'])){
+    if (empty($nmpenyakit)) {
+        echo '<div class="alert alert-danger">Nama penyakit tidak boleh kosong!</div>';
+    } else {
+        // Validasi apakah penyakit sudah ada dalam basis aturan
+        $sql = "SELECT basis_aturan.idaturan 
+                FROM basis_aturan 
+                INNER JOIN penyakit ON basis_aturan.idpenyakit = penyakit.idpenyakit 
+                WHERE penyakit.nmpenyakit = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $nmpenyakit);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-        $nmpenyakit=$_POST['nmpenyakit'];
+        if ($result->num_rows > 0) {
+            echo '<div class="alert alert-danger alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong>Data Basis aturan penyakit tersebut sudah ada!</strong>
+                  </div>';
+        } else {
+            // Ambil data penyakit berdasarkan nama
+            $sql = "SELECT * FROM penyakit WHERE nmpenyakit = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $nmpenyakit);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-            
-            // validasi nama penyakit
-            $sql = "SELECT basis_aturan.idaturan,basis_aturan.idpenyakit,penyakit.nmpenyakit 
-            FROM basis_aturan INNER JOIN penyakit 
-            ON basis_aturan.idpenyakit=penyakit.idpenyakit WHERE nmpenyakit='$nmpenyakit'";
-            $result = $conn->query($sql);
             if ($result->num_rows > 0) {
-                ?>
-                    <div class="alert alert-danger alert-dismissible fade show">
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        <strong>Data Basis aturan penyakit tersebut sudah ada</strong>
-                    </div>
-                <?php
-            }else{
+                $row = $result->fetch_assoc();
+                $idpenyakit = $row['idpenyakit'];
 
-            // mengambil data penyakit
-            $sql = "SELECT * FROM penyakit WHERE nmpenyakit='$nmpenyakit'";
-            $result = $conn->query($sql);
-            $row = $result->fetch_assoc();
-            $idpenyakit=$row['idpenyakit'];
+                // Proses simpan basis aturan
+                $sql = "INSERT INTO basis_aturan (idpenyakit) VALUES (?)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $idpenyakit);
 
-            //proses simpan basis aturan
-                $sql = "INSERT INTO basis_aturan VALUES (Null,'$idpenyakit')";
-                mysqli_query($conn,$sql);
+                if ($stmt->execute()) {
+                    // Ambil ID aturan yang baru saja disimpan
+                    $idaturan = $conn->insert_id;
 
-            //mengambil idgejala  
-            $idgejala=$_POST['idgejala'];
+                    // Proses simpan detail basis aturan
+                    $idgejala = $_POST['idgejala'] ?? [];
+                    if (!empty($idgejala)) {
+                        $sql = "INSERT INTO detail_basis_aturan (idaturan, idgejala) VALUES (?, ?)";
+                        $stmt = $conn->prepare($sql);
 
+                        foreach ($idgejala as $idgejalane) {
+                            $stmt->bind_param("ii", $idaturan, $idgejalane);
+                            $stmt->execute();
+                        }
+                    }
 
-            //proses mengambil data aturan
-            $sql = "SELECT * FROM basis_aturan ORDER BY idaturan DESC";
-            $result = $conn->query($sql);
-            $row = $result->fetch_assoc();
-            $idpenyakit=$row['idaturan'];
-
-            //proses simpan detail basis aturan
-            $jumlah = count($idgejala);
-            $i=0;
-            while($i < $jumlah){
-                $idgejalane=$idgejala[$i];
-                $sql = "INSERT INTO detail_basis_aturan VALUES ($idaturan,'$idgejalane')";
-                mysqli_query($conn,$sql);
-                $i++;
-            }
                     header("Location:?page=aturan");
+                    exit;
+                } else {
+                    echo '<div class="alert alert-danger">Gagal menyimpan data basis aturan!</div>';
+                }
+            } else {
+                echo '<div class="alert alert-danger">Penyakit tidak ditemukan!</div>';
+            }
         }
-
-
-    $sql = "INSERT INTO gejala VALUES (null, '$nmgejala')";
-    if($conn->query($sql) === TRUE) {
-        header("Location:?page=gejala");
     }
 }
-
 ?>
+
 
 <div class="row">
     <div class="col-sm-12">
         <form action="" method="POST" name="Form" onsubmit="return validasiForm()">
             <div class="card border-dark">
-                <div class="card-header bg-primary text-white border-dark"><strong>Tambah Data Basis Aturan</strong></div>
+                <div class="card-header bg-primary text-white border-dark">
+                    <strong>Tambah Data Basis Aturan</strong>
+                </div>
                 <div class="card-body">
                     <div class="form-group">
                         <label for="nmpenyakit">Nama Penyakit</label>
-                        <select class="form-control chosen" data-placeholder="Pilih Nama Penyakit" name="nmpenyakit">
-                            <option value=""></option>
+                        <select class="form-control chosen" data-placeholder="Pilih Nama Penyakit" name="nmpenyakit" required>
+                            <option value="">Pilih Nama Penyakit</option>
                             <?php
-                                $sql = "SELECT * FROM penyakit ORDER BY nmpenyakit ASC";
-                                $result = $conn->query($sql);
-                                while($row = $result->fetch_assoc()) {
-                            ?>
-                                <option value="<?php echo $row['nmpenyakit']; ?>"><?php echo $row['nmpenyakit']; ?></option>
-                            <?php
-                                }
+                            $sql = "SELECT * FROM penyakit ORDER BY nmpenyakit ASC";
+                            $result = $conn->query($sql);
+                            while ($row = $result->fetch_assoc()) {
+                                echo '<option value="' . htmlspecialchars($row['nmpenyakit']) . '">' . htmlspecialchars($row['nmpenyakit']) . '</option>';
+                            }
                             ?>
                         </select>
                     </div>
 
-                    <!-- tabel data gejala -->
-                    <div class="form group">
-                        <label for="">Pilih gejala-gejala berikut: </label>
-                        <table class="table table-bordered" >
+                    <div class="form-group">
+                        <label for="">Pilih Gejala-Gejala Berikut:</label>
+                        <table class="table table-bordered">
                             <thead>
-                            <tr>
-                                <th width="30px"></th> 
-                                <th width="30px">No.</th> 
-                                <th width="700px">Nama Gejala
-                            </tr>
+                                <tr>
+                                    <th width="30px"></th>
+                                    <th width="30px">No.</th>
+                                    <th>Nama Gejala</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                    $no=1;
-                                    $sql = "SELECT * FROM gejala ORDER BY nmgejala Asc";
-                                    $result = $conn->query($sql);
-                                    while($row = $result->fetch_assoc()) {
-                                    ?>
-                                    <tr>
-                                        <td align="center"><input type="checkbox" class="check-item" name="<?php echo 'idgejala[]'; ?>" value="<?php echo $row['idgejala']; ?>"></td>
-                                        <td><?php echo $no++; ?> </td>
-                                        <td><?php echo $row['nmgejala']; ?></td>
-                                        
-                                    </tr>
-                                    <?php
-                                        }
-                                        $conn->close();
-                                 ?>
+                                $no = 1;
+                                $sql = "SELECT * FROM gejala ORDER BY nmgejala ASC";
+                                $result = $conn->query($sql);
+                                while ($row = $result->fetch_assoc()) {
+                                    echo '<tr>
+                                            <td align="center">
+                                                <input type="checkbox" class="check-item" name="idgejala[]" value="' . htmlspecialchars($row['idgejala']) . '">
+                                            </td>
+                                            <td>' . $no++ . '</td>
+                                            <td>' . htmlspecialchars($row['nmgejala']) . '</td>
+                                          </tr>';
+                                }
+                                ?>
                             </tbody>
                         </table>
                     </div>
@@ -124,35 +128,29 @@
 
 
 <script type="text/javascript">
-    function validasiForm()
-    {
-        //validasi nama penyakit
+    function validasiForm() {
         var nmpenyakit = document.forms["Form"]["nmpenyakit"].value;
 
-        if(nmpenyakit==""){
-            alert("Pilih nama penyakit"); 
+        if (nmpenyakit === "") {
+            alert("Pilih nama penyakit");
             return false;
         }
 
-        // validasi gejala yang belum dipilih
-        var checkbox=document.getElementsByName('<? echo 'idgejala[]'; ?>');
+        var checkbox = document.getElementsByName('idgejala[]');
+        var isChecked = false;
 
-        var isChecked=false;
-
-        for(var i=0; i<checkbox.length; i++){
-            if(checkbox[i].checked){
+        for (var i = 0; i < checkbox.length; i++) {
+            if (checkbox[i].checked) {
                 isChecked = true;
                 break;
             }
         }
 
-        //jika belum ada yang di check
-        if(!isChecked){
+        if (!isChecked) {
             alert('Pilih setidaknya satu gejala!');
-
             return false;
         }
+
         return true;
     }
-
 </script>
