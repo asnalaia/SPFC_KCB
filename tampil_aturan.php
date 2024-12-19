@@ -17,7 +17,7 @@
          // Perbaiki query SQL, gunakan 'ORDER BY' dan tambahkan spasi setelah SELECT
          $sql = "SELECT basis_aturan.idaturan,basis_aturan.idpenyakit,
                         penyakit.nmpenyakit,penyakit.keterangan FROM basis_aturan INNER JOIN penyakit
-                        WHERE basis_aturan.idpenyakit=penyakit.id.penyakit ORDER BY nmpenyakit ASC"; 
+                        ON basis_aturan.idpenyakit=penyakit.idpenyakit ORDER BY nmpenyakit ASC"; 
          $result = $conn->query($sql);
          while ($row = $result->fetch_assoc()) {
         ?>
