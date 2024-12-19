@@ -160,9 +160,11 @@ include "config.php";
         } elseif ($action == "detail") {
             include "detail_aturan.php";
         } elseif ($action == "update") {
-            include "update_penyakit.php";
+            include "update_aturan.php";
+        } elseif ($action == "hapus_gejala") {
+            include "hapus_detail_aturan.php";
         } else {
-            include "hapus_penyakit.php";
+            include "hapus_aturan.php";
         }
     }
 
