@@ -116,7 +116,7 @@ include "config.php";
       </li>
 
       <?php
-      } elseif(if($_SESSION['role']!="Admin")){
+      } elseif($_SESSION['role']!="Admin"){
        ?>
       <li class="nav-item active">
         <a class="nav-link" href="?page=gejala">Gejala</a>
