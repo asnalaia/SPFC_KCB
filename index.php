@@ -1,4 +1,5 @@
 <?php
+session_start();
 include "config.php";
 ?>
 
@@ -101,6 +102,22 @@ include "config.php";
       <li class="nav-item active">
         <a class="nav-link" href="index.php">Home</a>
       </li>
+      <?php
+      if($_SESSION['role']!="Dokter"){
+      ?>
+      <li class="nav-item active">
+        <a class="nav-link" href="?page=users">users</a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="?page=aturan">Basis Aturan</a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="?page=">Konsultasi</a>
+      </li>
+
+      <?php
+      } elseif(if($_SESSION['role']!="Admin")){
+       ?>
       <li class="nav-item active">
         <a class="nav-link" href="?page=gejala">Gejala</a>
       </li>
@@ -108,17 +125,33 @@ include "config.php";
         <a class="nav-link" href="?page=penyakit">Penyakit</a>
       </li>
       <li class="nav-item active">
-        <a class="nav-link" href="?page=aturan">Aturan</a>
+        <a class="nav-link" href="?page=aturan">Basis Aturan</a>
       </li>
       <li class="nav-item active">
         <a class="nav-link" href="?page=konsultasi">Konsultasi</a>
       </li>
+
+      <?php
+      } else{
+        ?>
       <li class="nav-item active">
-        <a class="nav-link disabled" href="#">Logout</a>
+        <a class="nav-link" href="?page=konsultasi">Konsultasi</a>
+      </li>
+      <?php
+      }
+      ?>
+      <li class="nav-item active">
+        <a class="nav-link" href="?page=logout">Logout</a>
       </li>
     </ul>
   </div>
 </nav>
+
+<?php 
+    if($_SESSION['status']!="y"){
+        header("Location:login.php");
+    }
+?>
 
 <div class="container mt-4">
 
@@ -177,7 +210,7 @@ include "config.php";
             include "hapus_penyakit.php";
         }
     } else {
-        include "NAMA_HALAMAN";
+        include "logout.php";
     }
 
     ?>
