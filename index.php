@@ -166,6 +166,18 @@ include "config.php";
         } else {
             include "hapus_aturan.php";
         }
+    }elseif ($page == "konsultasi") {
+        if ($action == "") {
+            include "tampil_konsultasi.php";
+        } elseif ($action == "tambah") {
+            include "tambah_penyakit.php";
+        } elseif ($action == "update") {
+            include "update_penyakit.php";
+        } else {
+            include "hapus_penyakit.php";
+        }
+    } else {
+        include "NAMA_HALAMAN";
     }
 
     ?>
