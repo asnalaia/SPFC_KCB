@@ -209,6 +209,17 @@ include "config.php";
         } else {
             include "hapus_penyakit.php";
         }
+
+    }elseif ($page == "users") {
+        if ($action == "") {
+            include "tampil_users.php";
+        } elseif ($action == "tambah") {
+            include "tambah_users.php";
+        } elseif ($action == "update") {
+            include "update_users.php";
+        } else {
+            include "hapus_users.php";
+        }
     } else {
         include "logout.php";
     }
